@@ -276,6 +276,57 @@ template.innerHTML = /* html */ `
         .messages-area::-webkit-scrollbar-thumb:hover {
             background: #9ca3af;
         }
+
+        .typing-indicator {
+            background: var(--bot-bubble-bg);
+            color: var(--bot-bubble-text);
+            align-self: flex-start;
+            border-bottom-left-radius: 6px;
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 2px;
+        }
+
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--text-secondary);
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%,
+            60%,
+            100% {
+                opacity: 0.3;
+            }
+            30% {
+                opacity: 1;
+            }
+        }
+
+        .send-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
     </style>
     <div class="chat-container">
         <div class="chat-header">
@@ -374,15 +425,22 @@ class Chat extends HTMLElement {
         this.addMessage(message, true);
         messageInput.value = "";
 
+        this.setInputDisabled(true);
+        this.showTypingIndicator();
+
         try {
             const response = await this.sendToAPI(message);
+            this.hideTypingIndicator();
             this.addMessage(response, false);
         } catch (error) {
+            this.hideTypingIndicator();
             this.addMessage(
                 "Sorry, something went wrong. Please try again.",
                 false,
             );
             console.error("API Error:", error);
+        } finally {
+            this.setInputDisabled(false);
         }
     }
 
@@ -411,6 +469,45 @@ class Chat extends HTMLElement {
             this.shadowRoot.querySelector(".welcome-message");
         if (welcomeMessage) {
             welcomeMessage.remove();
+        }
+    }
+
+    showTypingIndicator() {
+        this.removeWelcomeMessage();
+
+        const messagesArea = this.shadowRoot.querySelector("#messages");
+        const typingDiv = document.createElement("div");
+        typingDiv.className = "typing-indicator";
+        typingDiv.id = "typing-indicator";
+        typingDiv.innerHTML = `
+            <div class="typing-dots">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            </div>
+        `;
+
+        messagesArea.appendChild(typingDiv);
+        messagesArea.scrollTop = messagesArea.scrollHeight;
+    }
+
+    hideTypingIndicator() {
+        const typingIndicator =
+            this.shadowRoot.querySelector("#typing-indicator");
+        if (typingIndicator) {
+            typingIndicator.remove();
+        }
+    }
+
+    setInputDisabled(disabled) {
+        const sendButton = this.shadowRoot.querySelector("#sendButton");
+        const messageInput = this.shadowRoot.querySelector("#messageInput");
+
+        if (sendButton) {
+            sendButton.disabled = disabled;
+        }
+        if (messageInput) {
+            messageInput.disabled = disabled;
         }
     }
 
