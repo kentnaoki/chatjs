@@ -57,7 +57,7 @@ const Template = (args) => {
 export const Default = Template.bind({});
 Default.args = {
     theme: "light",
-    apiEndpoint: "https://api.example.com/chat",
+    apiEndpoint: "mock",
     title: "Chat",
     welcomeMessage: "Welcome! How can I help you today? I'm default",
 };
@@ -65,7 +65,7 @@ Default.args = {
 export const DarkTheme = Template.bind({});
 DarkTheme.args = {
     theme: "dark",
-    apiEndpoint: "https://api.example.com/chat",
+    apiEndpoint: "mock",
     title: "Chat Dark Theme",
     welcomeMessage: "Welcome, I'm Dark",
 };
@@ -73,21 +73,21 @@ DarkTheme.args = {
 export const GreenTheme = Template.bind({});
 GreenTheme.args = {
     theme: "green",
-    apiEndpoint: "https://api.example.com/chat",
+    apiEndpoint: "mock",
     title: "Chat Green Theme",
 };
 
 export const PinkTheme = Template.bind({});
 PinkTheme.args = {
     theme: "pink",
-    apiEndpoint: "https://api.example.com/chat",
+    apiEndpoint: "mock",
     title: "Chat Pink Theme",
 };
 
 export const OrangeTheme = Template.bind({});
 OrangeTheme.args = {
     theme: "orange",
-    apiEndpoint: "https://api.example.com/chat",
+    apiEndpoint: "mock",
     title: "Chat Orange Theme",
 };
 

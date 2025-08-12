@@ -328,66 +328,132 @@ class Chat extends HTMLElement {
     }
 
     setupEventListeners() {
-        const sendButton = this.shadowRoot.querySelector('#sendButton');
-        const messageInput = this.shadowRoot.querySelector('#messageInput');
+        const sendButton = this.shadowRoot.querySelector("#sendButton");
+        const messageInput = this.shadowRoot.querySelector("#messageInput");
 
         if (sendButton) {
-            sendButton.addEventListener('click', this.handleSendMessage.bind(this));
+            sendButton.addEventListener(
+                "click",
+                this.handleSendMessage.bind(this),
+            );
         }
-        
+
         if (messageInput) {
-            messageInput.addEventListener('keypress', this.handleKeyPress.bind(this));
+            messageInput.addEventListener(
+                "keypress",
+                this.handleKeyPress.bind(this),
+            );
         }
     }
 
     removeEventListeners() {
-        const sendButton = this.shadowRoot.querySelector('#sendButton');
-        const messageInput = this.shadowRoot.querySelector('#messageInput');
+        const sendButton = this.shadowRoot.querySelector("#sendButton");
+        const messageInput = this.shadowRoot.querySelector("#messageInput");
 
         if (sendButton) {
-            sendButton.removeEventListener('click', this.handleSendMessage.bind(this));
+            sendButton.removeEventListener(
+                "click",
+                this.handleSendMessage.bind(this),
+            );
         }
-        
+
         if (messageInput) {
-            messageInput.removeEventListener('keypress', this.handleKeyPress.bind(this));
+            messageInput.removeEventListener(
+                "keypress",
+                this.handleKeyPress.bind(this),
+            );
         }
     }
 
-    handleSendMessage() {
-        const messageInput = this.shadowRoot.querySelector('#messageInput');
+    async handleSendMessage() {
+        const messageInput = this.shadowRoot.querySelector("#messageInput");
         const message = messageInput.value.trim();
 
         if (!message) return;
 
         this.addMessage(message, true);
-        messageInput.value = '';
+        messageInput.value = "";
+
+        try {
+            const response = await this.sendToAPI(message);
+            this.addMessage(response, false);
+        } catch (error) {
+            this.addMessage(
+                "Sorry, something went wrong. Please try again.",
+                false,
+            );
+            console.error("API Error:", error);
+        }
     }
 
     handleKeyPress(event) {
-        if (event.key === 'Enter' && !event.shiftKey) {
+        if (event.key === "Enter" && !event.shiftKey) {
             event.preventDefault();
             this.handleSendMessage();
         }
     }
 
     addMessage(messageText, isUser = false) {
-        const messagesArea = this.shadowRoot.querySelector('#messages');
-        
+        const messagesArea = this.shadowRoot.querySelector("#messages");
+
         this.removeWelcomeMessage();
-        
-        const messageDiv = document.createElement('div');
-        messageDiv.className = `message-bubble ${isUser ? 'user-message' : 'bot-message'}`;
+
+        const messageDiv = document.createElement("div");
+        messageDiv.className = `message-bubble ${isUser ? "user-message" : "bot-message"}`;
         messageDiv.textContent = messageText;
-        
+
         messagesArea.appendChild(messageDiv);
         messagesArea.scrollTop = messagesArea.scrollHeight;
     }
 
     removeWelcomeMessage() {
-        const welcomeMessage = this.shadowRoot.querySelector('.welcome-message');
+        const welcomeMessage =
+            this.shadowRoot.querySelector(".welcome-message");
         if (welcomeMessage) {
             welcomeMessage.remove();
         }
+    }
+
+    async sendToAPI(message) {
+        const apiEndpoint = this.getAttribute("api-endpoint");
+
+        if (apiEndpoint && apiEndpoint !== "mock") {
+            return this.sendToRealAPI(apiEndpoint, message);
+        } else {
+            return this.sendToMockAPI(message);
+        }
+    }
+
+    async sendToMockAPI(message) {
+        await new Promise((resolve) =>
+            setTimeout(resolve, 1000 + Math.random() * 1000),
+        );
+
+        const mockResponses = [
+            `Thanks for sharing "${message}" with me. How can I help further?`,
+            `I received your message about "${message}". Let me think about that.`,
+            `You mentioned "${message}". Could you tell me more?`,
+            `I see you're asking about "${message}". Here's what I think...`,
+        ];
+
+        return mockResponses[Math.floor(Math.random() * mockResponses.length)];
+    }
+
+    async sendToRealAPI(endpoint, message) {
+        const response = await fetch(endpoint, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ message }),
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data.response || data.message || "No response from server";
     }
 
     static get observedAttributes() {
