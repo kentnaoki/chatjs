@@ -279,7 +279,9 @@ template.innerHTML = /* html */ `
     </style>
     <div class="chat-container">
         <div class="chat-header">
-            <h2 class="chat-title">Chat Assistant</h2>
+            <h2 class="chat-title">
+                <slot name="title">Chat Assistant</slot>
+            </h2>
         </div>
         <div class="messages-area" id="messages">
             <div class="welcome-message">
@@ -314,32 +316,18 @@ class Chat extends HTMLElement {
 
         this.loadSavedTheme();
 
-        if (!this.hasAttribute("title")) {
-            this.setAttribute("title", "Chat Assistant");
-        }
-        
-        this.updateTitle(this.getAttribute("title"));
     }
 
     static get observedAttributes() {
-        return ["theme", "title"];
+        return ["theme"];
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
         if (name === "theme" && oldValue !== newValue) {
             this.saveTheme(newValue);
         }
-        if (name === "title" && oldValue !== newValue) {
-            this.updateTitle(newValue);
-        }
     }
     
-    updateTitle(title) {
-        const titleElement = this.shadowRoot.querySelector('.chat-title');
-        if (titleElement) {
-            titleElement.textContent = title || 'Chat Assistant';
-        }
-    }
 
     setTheme(themeName) {
         this.setAttribute("theme", themeName);
