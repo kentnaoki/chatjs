@@ -31,7 +31,8 @@ export default {
 const Template = (args) => {
     const container = document.createElement("div");
 
-    container.innerHTML = `<chat-container></chat-container>`;
+    const titleSlot = args.title ? `<span slot="title">${args.title}</span>` : '';
+    container.innerHTML = `<chat-container>${titleSlot}</chat-container>`;
     const chatElement = container.firstElementChild;
 
     if (args.theme) {
@@ -39,10 +40,6 @@ const Template = (args) => {
     }
     if (args.apiEndpoint) {
         chatElement.setAttribute("api-endpoint", args.apiEndpoint);
-    }
-
-    if (args.title) {
-        chatElement.setAttribute("title", args.title);
     }
 
     return chatElement;
