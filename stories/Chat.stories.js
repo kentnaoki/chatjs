@@ -115,7 +115,7 @@ export const ThemeSwitcher = () => {
     });
 
     const cycleButton = document.createElement("button");
-    cycleButton.textContent = "🎨 Cycle Theme";
+    cycleButton.textContent = "Cycle Theme";
     cycleButton.style.padding = "8px 16px";
     cycleButton.style.border = "1px solid #ccc";
     cycleButton.style.borderRadius = "4px";
