@@ -319,6 +319,77 @@ class Chat extends HTMLElement {
         this.loadSavedTheme();
     }
 
+    connectedCallback() {
+        this.setupEventListeners();
+    }
+
+    disconnectedCallback() {
+        this.removeEventListeners();
+    }
+
+    setupEventListeners() {
+        const sendButton = this.shadowRoot.querySelector('#sendButton');
+        const messageInput = this.shadowRoot.querySelector('#messageInput');
+
+        if (sendButton) {
+            sendButton.addEventListener('click', this.handleSendMessage.bind(this));
+        }
+        
+        if (messageInput) {
+            messageInput.addEventListener('keypress', this.handleKeyPress.bind(this));
+        }
+    }
+
+    removeEventListeners() {
+        const sendButton = this.shadowRoot.querySelector('#sendButton');
+        const messageInput = this.shadowRoot.querySelector('#messageInput');
+
+        if (sendButton) {
+            sendButton.removeEventListener('click', this.handleSendMessage.bind(this));
+        }
+        
+        if (messageInput) {
+            messageInput.removeEventListener('keypress', this.handleKeyPress.bind(this));
+        }
+    }
+
+    handleSendMessage() {
+        const messageInput = this.shadowRoot.querySelector('#messageInput');
+        const message = messageInput.value.trim();
+
+        if (!message) return;
+
+        this.addMessage(message, true);
+        messageInput.value = '';
+    }
+
+    handleKeyPress(event) {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            this.handleSendMessage();
+        }
+    }
+
+    addMessage(messageText, isUser = false) {
+        const messagesArea = this.shadowRoot.querySelector('#messages');
+        
+        this.removeWelcomeMessage();
+        
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message-bubble ${isUser ? 'user-message' : 'bot-message'}`;
+        messageDiv.textContent = messageText;
+        
+        messagesArea.appendChild(messageDiv);
+        messagesArea.scrollTop = messagesArea.scrollHeight;
+    }
+
+    removeWelcomeMessage() {
+        const welcomeMessage = this.shadowRoot.querySelector('.welcome-message');
+        if (welcomeMessage) {
+            welcomeMessage.remove();
+        }
+    }
+
     static get observedAttributes() {
         return ["theme"];
     }
