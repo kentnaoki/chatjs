@@ -201,3 +201,46 @@ export const ThemeSwitcher = () => {
 
     return container;
 };
+
+export const MessageTypes = () => {
+    const container = document.createElement("div");
+    container.style.padding = "20px";
+
+    const chatContainer = document.createElement("div");
+    chatContainer.innerHTML = `<chat-container theme="light" api-endpoint="mock">
+        <span slot="title">Different Message Types</span>
+        <div slot="welcome-message">Try the buttons below to see different message types!</div>
+    </chat-container>`;
+    const chatElement = chatContainer.firstElementChild;
+
+    const buttonContainer = document.createElement("div");
+    buttonContainer.style.marginBottom = "20px";
+    buttonContainer.style.display = "flex";
+    buttonContainer.style.gap = "10px";
+    buttonContainer.style.flexWrap = "wrap";
+
+    const buttons = [
+        { text: "Add User Message", action: () => chatElement.addUserMessage("Hello from external code!") },
+        { text: "Add Bot Message", action: () => chatElement.addBotMessage("Hi! I'm injected from outside.") },
+        { text: "Add System Message", action: () => chatElement.addSystemMessage("User joined the chat") },
+        { text: "Add With Timestamp", action: () => chatElement.addBotMessage("This message has a timestamp", new Date().toISOString()) },
+        { text: "Clear Messages", action: () => chatElement.clearMessages() },
+    ];
+
+    buttons.forEach(({ text, action }) => {
+        const button = document.createElement("button");
+        button.textContent = text;
+        button.style.padding = "8px 12px";
+        button.style.border = "1px solid #ccc";
+        button.style.borderRadius = "4px";
+        button.style.cursor = "pointer";
+        button.style.backgroundColor = "white";
+        button.addEventListener("click", action);
+        buttonContainer.appendChild(button);
+    });
+
+    container.appendChild(buttonContainer);
+    container.appendChild(chatElement);
+    
+    return container;
+};

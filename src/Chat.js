@@ -327,6 +327,29 @@ template.innerHTML = /* html */ `
             cursor: not-allowed;
             transform: none !important;
         }
+        
+        .system-message {
+            text-align: center;
+            padding: 8px 12px;
+            margin: 16px auto;
+            max-width: 70%;
+            background: var(--text-secondary);
+            color: var(--background-color);
+            border-radius: 12px;
+            font-size: 13px;
+            opacity: 0.8;
+        }
+        
+        .message-timestamp {
+            font-size: 11px;
+            opacity: 0.6;
+            margin-top: 4px;
+            text-align: right;
+        }
+        
+        .user-message .message-timestamp {
+            text-align: left;
+        }
     </style>
     <div class="chat-container">
         <div class="chat-header">
@@ -489,14 +512,34 @@ class Chat extends HTMLElement {
         }
     }
 
-    addMessage(messageText, isUser = false) {
+    addMessage(messageText, isUser = false, messageType = 'text', timestamp = null) {
         const messagesArea = this.shadowRoot.querySelector("#messages");
 
         this.removeWelcomeMessage();
 
         const messageDiv = document.createElement("div");
-        messageDiv.className = `message-bubble ${isUser ? "user-message" : "bot-message"}`;
-        messageDiv.textContent = messageText;
+        
+        // Handle different message types
+        if (messageType === 'system') {
+            messageDiv.className = 'system-message';
+        } else {
+            messageDiv.className = `message-bubble ${isUser ? "user-message" : "bot-message"}`;
+        }
+
+        // Handle content based on type
+        if (messageType === 'html') {
+            messageDiv.innerHTML = messageText;
+        } else {
+            messageDiv.textContent = messageText;
+        }
+
+        // Add timestamp if provided
+        if (timestamp) {
+            const timeDiv = document.createElement('div');
+            timeDiv.className = 'message-timestamp';
+            timeDiv.textContent = new Date(timestamp).toLocaleTimeString();
+            messageDiv.appendChild(timeDiv);
+        }
 
         messagesArea.appendChild(messageDiv);
         messagesArea.scrollTop = messagesArea.scrollHeight;
@@ -656,6 +699,39 @@ class Chat extends HTMLElement {
         const currentIndex = themes.indexOf(this.getTheme());
         const nextIndex = (currentIndex + 1) % themes.length;
         this.switchTheme(themes[nextIndex]);
+    }
+
+    // Public API for external message injection
+    addUserMessage(message, timestamp = null) {
+        this.addMessage(message, true, 'text', timestamp);
+        this.dispatchEvent(new CustomEvent('external-message-added', {
+            detail: { message, type: 'user', timestamp },
+            bubbles: true
+        }));
+    }
+
+    addBotMessage(message, timestamp = null) {
+        this.addMessage(message, false, 'text', timestamp);
+        this.dispatchEvent(new CustomEvent('external-message-added', {
+            detail: { message, type: 'bot', timestamp },
+            bubbles: true
+        }));
+    }
+
+    addSystemMessage(message, timestamp = null) {
+        this.addMessage(message, null, 'system', timestamp);
+        this.dispatchEvent(new CustomEvent('external-message-added', {
+            detail: { message, type: 'system', timestamp },
+            bubbles: true
+        }));
+    }
+
+    clearMessages() {
+        const messagesArea = this.shadowRoot.querySelector("#messages");
+        messagesArea.innerHTML = '';
+        this.dispatchEvent(new CustomEvent('messages-cleared', {
+            bubbles: true
+        }));
     }
 }
 
