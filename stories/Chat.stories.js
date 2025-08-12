@@ -91,12 +91,71 @@ OrangeTheme.args = {
     title: "Chat Orange Theme",
 };
 
+export const WithEventLogging = () => {
+    const container = document.createElement("div");
+    container.style.padding = "20px";
+
+    const logContainer = document.createElement("div");
+    logContainer.style.marginBottom = "20px";
+    logContainer.style.padding = "10px";
+    logContainer.style.background = "#f5f5f5";
+    logContainer.style.borderRadius = "8px";
+    logContainer.style.fontFamily = "monospace";
+    logContainer.style.fontSize = "12px";
+    logContainer.style.maxHeight = "150px";
+    logContainer.style.overflowY = "auto";
+    logContainer.innerHTML = "<strong>Event Log:</strong><div id='event-log'></div>";
+
+    const chatContainer = document.createElement("div");
+    chatContainer.innerHTML = `<chat-container theme="light" api-endpoint="mock">
+        <span slot="title">Event Logging Demo</span>
+        <div slot="welcome-message">Send a message to see events in the log above!</div>
+    </chat-container>`;
+    const chatElement = chatContainer.firstElementChild;
+
+    const eventLog = logContainer.querySelector('#event-log');
+    
+    const logEvent = (eventName, detail) => {
+        const logEntry = document.createElement('div');
+        logEntry.style.margin = "2px 0";
+        logEntry.innerHTML = `<span style="color: #666;">[${new Date().toLocaleTimeString()}]</span> <strong>${eventName}</strong>: ${JSON.stringify(detail, null, 2)}`;
+        eventLog.appendChild(logEntry);
+        eventLog.scrollTop = eventLog.scrollHeight;
+    };
+
+    chatElement.addEventListener('message-sent', (e) => {
+        logEvent('message-sent', e.detail);
+    });
+
+    chatElement.addEventListener('typing-start', (e) => {
+        logEvent('typing-start', e.detail);
+    });
+
+    chatElement.addEventListener('typing-end', (e) => {
+        logEvent('typing-end', e.detail);
+    });
+
+    chatElement.addEventListener('message-received', (e) => {
+        logEvent('message-received', e.detail);
+    });
+
+    chatElement.addEventListener('chat-error', (e) => {
+        logEvent('chat-error', e.detail);
+    });
+
+    container.appendChild(logContainer);
+    container.appendChild(chatElement);
+    
+    return container;
+};
+
 export const ThemeSwitcher = () => {
     const container = document.createElement("div");
     container.style.padding = "20px";
 
-    const chatElement = document.createElement("chat-container");
-    chatElement.setAttribute("theme", "light");
+    const chatContainer = document.createElement("div");
+    chatContainer.innerHTML = `<chat-container theme="light"></chat-container>`;
+    const chatElement = chatContainer.firstElementChild;
 
     const buttonContainer = document.createElement("div");
     buttonContainer.style.marginBottom = "20px";
@@ -140,5 +199,48 @@ export const ThemeSwitcher = () => {
     container.appendChild(buttonContainer);
     container.appendChild(chatElement);
 
+    return container;
+};
+
+export const MessageTypes = () => {
+    const container = document.createElement("div");
+    container.style.padding = "20px";
+
+    const chatContainer = document.createElement("div");
+    chatContainer.innerHTML = `<chat-container theme="light" api-endpoint="mock">
+        <span slot="title">Different Message Types</span>
+        <div slot="welcome-message">Try the buttons below to see different message types!</div>
+    </chat-container>`;
+    const chatElement = chatContainer.firstElementChild;
+
+    const buttonContainer = document.createElement("div");
+    buttonContainer.style.marginBottom = "20px";
+    buttonContainer.style.display = "flex";
+    buttonContainer.style.gap = "10px";
+    buttonContainer.style.flexWrap = "wrap";
+
+    const buttons = [
+        { text: "Add User Message", action: () => chatElement.addUserMessage("Hello from external code!") },
+        { text: "Add Bot Message", action: () => chatElement.addBotMessage("Hi! I'm injected from outside.") },
+        { text: "Add System Message", action: () => chatElement.addSystemMessage("User joined the chat") },
+        { text: "Add With Timestamp", action: () => chatElement.addBotMessage("This message has a timestamp", new Date().toISOString()) },
+        { text: "Clear Messages", action: () => chatElement.clearMessages() },
+    ];
+
+    buttons.forEach(({ text, action }) => {
+        const button = document.createElement("button");
+        button.textContent = text;
+        button.style.padding = "8px 12px";
+        button.style.border = "1px solid #ccc";
+        button.style.borderRadius = "4px";
+        button.style.cursor = "pointer";
+        button.style.backgroundColor = "white";
+        button.addEventListener("click", action);
+        buttonContainer.appendChild(button);
+    });
+
+    container.appendChild(buttonContainer);
+    container.appendChild(chatElement);
+    
     return container;
 };
