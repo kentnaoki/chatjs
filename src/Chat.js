@@ -285,7 +285,9 @@ template.innerHTML = /* html */ `
         </div>
         <div class="messages-area" id="messages">
             <div class="welcome-message">
-                Welcome! How can I help you today?
+                <slot name="welcome-message">
+                    Welcome! How can I help you today?
+                </slot>
             </div>
         </div>
         <div class="input-area">
@@ -315,7 +317,6 @@ class Chat extends HTMLElement {
         }
 
         this.loadSavedTheme();
-
     }
 
     static get observedAttributes() {
@@ -327,7 +328,6 @@ class Chat extends HTMLElement {
             this.saveTheme(newValue);
         }
     }
-    
 
     setTheme(themeName) {
         this.setAttribute("theme", themeName);
