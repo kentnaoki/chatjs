@@ -425,22 +425,60 @@ class Chat extends HTMLElement {
         this.addMessage(message, true);
         messageInput.value = "";
 
+        this.dispatchEvent(new CustomEvent('message-sent', {
+            detail: { 
+                message: message, 
+                timestamp: new Date().toISOString() 
+            },
+            bubbles: true
+        }));
+
         this.setInputDisabled(true);
         this.showTypingIndicator();
+
+        this.dispatchEvent(new CustomEvent('typing-start', {
+            detail: { message: message },
+            bubbles: true
+        }));
 
         try {
             const response = await this.sendToAPI(message);
             this.hideTypingIndicator();
             this.addMessage(response, false);
+
+            this.dispatchEvent(new CustomEvent('message-received', {
+                detail: { 
+                    message: message,
+                    response: response,
+                    timestamp: new Date().toISOString()
+                },
+                bubbles: true
+            }));
+
         } catch (error) {
             this.hideTypingIndicator();
             this.addMessage(
                 "Sorry, something went wrong. Please try again.",
                 false,
             );
+
+            this.dispatchEvent(new CustomEvent('chat-error', {
+                detail: { 
+                    message: message,
+                    error: error.message,
+                    timestamp: new Date().toISOString()
+                },
+                bubbles: true
+            }));
+
             console.error("API Error:", error);
         } finally {
             this.setInputDisabled(false);
+            
+            this.dispatchEvent(new CustomEvent('typing-end', {
+                detail: { message: message },
+                bubbles: true
+            }));
         }
     }
 
