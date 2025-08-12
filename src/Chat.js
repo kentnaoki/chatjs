@@ -319,6 +319,57 @@ class Chat extends HTMLElement {
         this.loadSavedTheme();
     }
 
+    connectedCallback() {
+        this.setupEventListeners();
+    }
+
+    disconnectedCallback() {
+        this.removeEventListeners();
+    }
+
+    setupEventListeners() {
+        const sendButton = this.shadowRoot.querySelector('#sendButton');
+        const messageInput = this.shadowRoot.querySelector('#messageInput');
+
+        if (sendButton) {
+            sendButton.addEventListener('click', this.handleSendMessage.bind(this));
+        }
+        
+        if (messageInput) {
+            messageInput.addEventListener('keypress', this.handleKeyPress.bind(this));
+        }
+    }
+
+    removeEventListeners() {
+        const sendButton = this.shadowRoot.querySelector('#sendButton');
+        const messageInput = this.shadowRoot.querySelector('#messageInput');
+
+        if (sendButton) {
+            sendButton.removeEventListener('click', this.handleSendMessage.bind(this));
+        }
+        
+        if (messageInput) {
+            messageInput.removeEventListener('keypress', this.handleKeyPress.bind(this));
+        }
+    }
+
+    handleSendMessage() {
+        const messageInput = this.shadowRoot.querySelector('#messageInput');
+        const message = messageInput.value.trim();
+
+        if (!message) return;
+
+        console.log('Sending message:', message);
+        messageInput.value = '';
+    }
+
+    handleKeyPress(event) {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            this.handleSendMessage();
+        }
+    }
+
     static get observedAttributes() {
         return ["theme"];
     }
