@@ -359,7 +359,7 @@ class Chat extends HTMLElement {
 
         if (!message) return;
 
-        console.log('Sending message:', message);
+        this.addMessage(message, true);
         messageInput.value = '';
     }
 
@@ -367,6 +367,26 @@ class Chat extends HTMLElement {
         if (event.key === 'Enter' && !event.shiftKey) {
             event.preventDefault();
             this.handleSendMessage();
+        }
+    }
+
+    addMessage(messageText, isUser = false) {
+        const messagesArea = this.shadowRoot.querySelector('#messages');
+        
+        this.removeWelcomeMessage();
+        
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message-bubble ${isUser ? 'user-message' : 'bot-message'}`;
+        messageDiv.textContent = messageText;
+        
+        messagesArea.appendChild(messageDiv);
+        messagesArea.scrollTop = messagesArea.scrollHeight;
+    }
+
+    removeWelcomeMessage() {
+        const welcomeMessage = this.shadowRoot.querySelector('.welcome-message');
+        if (welcomeMessage) {
+            welcomeMessage.remove();
         }
     }
 
