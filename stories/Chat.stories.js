@@ -25,14 +25,23 @@ export default {
             control: "text",
             description: "Chat Title",
         },
+        welcomeMessage: {
+            control: "text",
+            description: "Welcome message displayed in chat",
+        },
     },
 };
 
 const Template = (args) => {
     const container = document.createElement("div");
 
-    const titleSlot = args.title ? `<span slot="title">${args.title}</span>` : '';
-    container.innerHTML = `<chat-container>${titleSlot}</chat-container>`;
+    const titleSlot = args.title
+        ? `<span slot="title">${args.title}</span>`
+        : "";
+    const welcomeSlot = args.welcomeMessage
+        ? `<div slot="welcome-message">${args.welcomeMessage}</div>`
+        : "";
+    container.innerHTML = `<chat-container>${titleSlot}${welcomeSlot}</chat-container>`;
     const chatElement = container.firstElementChild;
 
     if (args.theme) {
@@ -50,6 +59,7 @@ Default.args = {
     theme: "light",
     apiEndpoint: "https://api.example.com/chat",
     title: "Chat",
+    welcomeMessage: "Welcome! How can I help you today? I'm default",
 };
 
 export const DarkTheme = Template.bind({});
@@ -57,6 +67,7 @@ DarkTheme.args = {
     theme: "dark",
     apiEndpoint: "https://api.example.com/chat",
     title: "Chat Dark Theme",
+    welcomeMessage: "Welcome, I'm Dark",
 };
 
 export const GreenTheme = Template.bind({});
